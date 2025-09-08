@@ -1,0 +1,218 @@
+### Perplexity prompt for e-commerce website (Spring Boot MVC, Java 21, MySQL 8.0)
+
+Copy-paste the prompt below into Perplexity as-is. It captures all requirements precisely and sets clear deliverables, acceptance criteria, and tech constraints.
+
+---
+
+Create a complete, working E‑commerce web application with the following exact requirements. Provide a downloadable ZIP of the full project, and include all source code inline as well. Follow every instruction precisely.
+
+# Goal and scope
+- Build a functional E‑commerce website with a clean, attractive UI and fully working backend.
+- Architecture: MVC compatible with Java Spring (use Spring Boot MVC).
+- Language/Runtime: Java 21.
+- Database: MySQL 8.0.x.
+- IDE/environment: IntelliJ IDEA Community Edition, MySQL Workbench 8.0.x.
+- Currency: INR for all prices.
+- Minimum 10 products preloaded, each with an image.
+- Authentication: session-based login with predefined users and working registration for new customers.
+
+# Tech stack and dependencies
+- Spring Boot 3.x (Java 21 compatible).
+- Spring Web (MVC, Thymeleaf views).
+- Spring Data JPA (Hibernate) with MySQL 8.0 driver.
+- Spring Security (session-based auth, BCrypt password encoding).
+- Validation (Jakarta Bean Validation).
+- Lombok (optional, if used include setup note).
+- Thymeleaf for server-side rendered pages.
+- Frontend: HTML5, CSS3, Bootstrap 5 (for attractive, responsive UI).
+- Static images served from src/main/resources/static/images.
+
+# Modules to implement now
+1) Product catalog
+- List, view product details.
+- Product fields: id, name, description, category, price (INR), stockQty, imageUrl.
+- Show price in INR with correct symbol and formatting (₹, en_IN formatting).
+- Seed with at least 10 products and image files.
+
+2) Shopping cart
+- Add to cart from product list/detail.
+- View cart, update quantities, remove items, show cart totals in INR.
+- Persist cart per session for logged-in user.
+
+3) Order processing (basic)
+- Checkout page (address confirmation + place order).
+- Create Order and OrderItems from cart.
+- Order status: CREATED initially.
+- Order history page for the logged-in user.
+
+4) User management
+- Registration for new customers (working end-to-end).
+- Login and logout (session-based).
+- Profile page (view + update).
+- Roles: CUSTOMER, ADMIN (prepare role handling; ADMIN UI not required yet).
+
+# User management specification (3.5)
+- Controller: UserController
+  - registerUser(userData)
+  - loginUser(username, password)
+  - getUserProfile(userId)
+  - updateUserProfile(userId, userData)
+- Service: UserService (auth + profile mgmt).
+- Entity: User
+  - userId (PK, Long)
+  - username (VARCHAR, unique, required)
+  - password (VARCHAR, encrypted with BCrypt)
+  - role (ENUM or String: CUSTOMER, ADMIN)
+  - email (VARCHAR, optional if registration excludes it)
+  - name (VARCHAR)
+  - phone (VARCHAR)
+  - address (TEXT)
+- Registration form fields (required): name, phone number, address, username, password. Email optional. Validate inputs and show errors nicely.
+
+# Predefined users for login
+- Customer 1:
+  - user id: customer1
+  - password: customer123
+- Customer 2:
+  - user id: customer2
+  - password: customer123
+- Store these with BCrypt hashing in the DB on application startup. Ensure login works with the plain passwords above.
+
+# Pages and UI requirements
+- Login gateway page:
+  - White background, clean and attractive UI.
+  - Username and password inputs, login button, link to registration.
+- Registration page:
+  - Fields: name, phone, address, username, password (+ optional email).
+  - Validation: required fields, min password length, phone format.
+- Product listing page:
+  - Grid cards with image, name, price (₹), Add to Cart.
+- Product detail page:
+  - Image, name, description, category, stock, price (₹), Add to Cart.
+- Cart page:
+  - Items with image thumbnail, name, price (₹), quantity update, remove, totals (₹).
+- Checkout page:
+  - Prefill user’s saved address, editable; place order button.
+- Order confirmation page and order history page.
+- Header with navigation (Products, Cart, Orders, Profile, Logout). Show cart item count.
+- Use Bootstrap 5 for styling; keep visuals modern and consistent.
+
+# Backend behaviors
+- Authentication:
+  - Spring Security form-login, session-based.
+  - BCrypt password encoding.
+  - Access control: only authenticated users can access cart, checkout, orders, and profile.
+  - CSRF enabled for forms.
+- Data:
+  - Use JPA entities for User, Product, CartItem (or Cart + CartItem), Order, OrderItem.
+  - On startup, seed:
+    - 2 users above (BCrypted).
+    - ≥10 products with image files and realistic INR prices.
+  - Persist orders to DB.
+- Currency:
+  - Always display with INR symbol ₹ and locale formatting (en_IN).
+
+# Project setup
+- Build tool: Maven.
+- Java version: 21.
+- Packaging: jar.
+- App runs at http://localhost:8080/.
+- Provide application.properties with placeholders and a sample configured version:
+  - spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+  - spring.datasource.username=YOUR_USER
+  - spring.datasource.password=YOUR_PASSWORD
+  - spring.jpa.hibernate.ddl-auto=update
+  - spring.jpa.show-sql=true
+  - spring.jpa.properties.hibernate.format_sql=true
+  - spring.thymeleaf.cache=false
+- Include instructions for creating the DB/schema if needed. Prefer automatic schema creation via JPA for first run.
+
+# Controllers and routes (examples, adjust as needed)
+- Auth:
+  - GET /login
+  - POST /login
+  - GET /register
+  - POST /register
+  - POST /logout
+- Products:
+  - GET /products
+  - GET /products/{id}
+- Cart:
+  - POST /cart/add/{productId}
+  - GET /cart
+  - POST /cart/update/{itemId}
+  - POST /cart/remove/{itemId}
+- Checkout/Orders:
+  - GET /checkout
+  - POST /checkout/place-order
+  - GET /orders
+  - GET /orders/{orderId}
+- Profile:
+  - GET /profile
+  - POST /profile
+
+# Data model (minimum)
+- User(userId, username, password, role, name, phone, address, email?)
+- Product(id, name, description, category, price, stockQty, imageUrl)
+- Order(id, userId(FK), createdAt, status)
+- OrderItem(id, orderId(FK), productId(FK), quantity, unitPrice)
+- CartItem(id, userId(FK), productId(FK), quantity) 
+  - Or Cart(id, userId) + CartItem(cartId, productId, quantity) — choose one consistent approach.
+
+# Seed data
+- Provide a DataLoader/CommandLineRunner that:
+  - Inserts two users (customer1/customer123, customer2/customer123) with BCrypt passwords.
+  - Inserts ≥10 products with realistic INR prices and stock, and copies product images into static/images.
+- Use relative URLs for images like /images/product-01.jpg. Bundle these image files in the ZIP.
+
+# Acceptance criteria
+- I can:
+  1) Run the app in IntelliJ CE with Java 21 and MySQL 8.0, no code edits needed beyond DB credentials.
+  2) Log in with customer1/customer123 and customer2/customer123.
+  3) Register a new user and then log in.
+  4) Browse at least 10 products (with images) and see prices in ₹.
+  5) Add products to cart, update quantities, remove items, and see totals in ₹.
+  6) Complete checkout to create an order, then view my order history.
+  7) View and update my profile (name, phone, address, optional email).
+- All pages styled attractively with Bootstrap 5 and responsive layout.
+- Login page has a white background as specified.
+- Passwords are stored encrypted (BCrypt).
+- No broken links, null pointer errors, or missing resources.
+
+# Deliverables
+- A downloadable ZIP of the full Maven project.
+- Full source code included inline in the answer as well.
+- A README2 file at project root with:
+  - Required software: Java 21, Maven, MySQL 8.0.x, IntelliJ IDEA Community Edition, MySQL Workbench 8.0.x, Git (optional), and any plugin like Lombok.
+  - Setup steps: clone/extract, configure application.properties, create DB if needed, run the app, login credentials, URLs.
+  - Troubleshooting notes (common MySQL auth issues, port conflicts).
+  - How to change seed data and product images.
+  - How to switch ddl-auto from update to validate for prod-like use.
+- Include product images in src/main/resources/static/images and reference them correctly.
+- Include SQL script (optional) only if you’re not using JPA auto DDL; otherwise not required.
+
+# Project structure (example)
+- src/main/java/.../controller (UserController, ProductController, CartController, OrderController, AuthController)
+- src/main/java/.../service (UserService, ProductService, CartService, OrderService, SecurityConfig)
+- src/main/java/.../model/entity (User, Product, Order, OrderItem, CartItem)
+- src/main/java/.../config (security, mvc)
+- src/main/java/.../bootstrap (DataLoader)
+- src/main/resources/templates (Thymeleaf HTML: login.html, register.html, products.html, product-detail.html, cart.html, checkout.html, orders.html, profile.html, fragments/header.html)
+- src/main/resources/static (css, js, images)
+- README2.md
+- pom.xml
+
+# Notes and constraints
+- Use only Java 21 features compatible with Spring Boot 3.x.
+- Keep code clean, names consistent, and layers separated.
+- Ensure CSRF tokens are in forms.
+- Use DTOs and validation annotations on registration/profile forms and handle errors in the UI.
+- Do not hardcode absolute file paths; bundle images in the project.
+- Ensure all features work end-to-end from frontend to backend without missing pieces.
+
+Provide:
+1) The downloadable ZIP link.
+2) The entire project code inline (organized by files with clear file paths).
+3) The README2 with full integration instructions for IntelliJ CE and MySQL Workbench.
+
+If any assumption is needed, choose the simplest option that satisfies all acceptance criteria and document it in README2.
