@@ -1,0 +1,323 @@
+EchoCart — every purchase echoes your style
+You want this to feel sharp, modern, and unmistakably yours. Below is a clean, production-focused prompt you can hand to Perplexity to get a Spring Boot project aligned to your exact requirements, plus a step-by-step integration guide for your laptop, and concrete design/feature specs your devs can implement directly.
+
+Master prompt to generate the project
+Use this exact prompt. It’s tailored for Spring Boot, dark elegant branding, Vanta.js on login, OTP via phone, and UPI-ready checkout.
+
+Project name: EchoCart — every purchase echoes your style
+
+Tech stack:
+
+Backend: Spring Boot 3, Java 17, Spring Web, Spring Security, Spring Data JPA, Validation, Lombok, Flyway, PostgreSQL, Jackson, JWT
+
+Frontend: React + TypeScript + Vite (or Next.js), Tailwind CSS, Axios, React Router, Vanta.js for animated login background
+
+Build & tooling: Maven, Docker Compose for local Postgres, ZXing (QR generation), JJWT (tokens), BCrypt (password hashing)
+
+Theme and brand:
+
+Palette: #000000 (base), #14213D (cards/sections), #FCA311 (primary accent), #E5E5E5 (text)
+
+Design intent: Minimal, high-contrast dark UI with amber accents; smooth micro-interactions (150–250ms), accessible focus rings, WCAG AA contrast.
+
+Typography: Inter or Roboto; headings bold, body regular; 1.5 line height.
+
+Icon style: 2px stroke, monochrome, subtle glows for active states using #FCA311 at 30% opacity.
+
+Login experience:
+
+Fullscreen Vanta.js animated background (NET/FOG/WAVES), low intensity; backgroundColor #000000, primary color #FCA311.
+
+Right-aligned login card (max width 420px), vertically centered, card surface #14213D, text #E5E5E5.
+
+Tabs: “Phone” and “Email”.
+
+Phone login via OTP (send + verify). Email login via password.
+
+Forgot password via phone OTP reset flow.
+
+Small illustration or icon indicating “Login” on the card header.
+
+Micro-interactions: hover brightness +4%, press state, focus ring in #FCA311 (2–3px), smooth opacity/translate transitions.
+
+Registration:
+
+Existing flow retained; add password strength meter and duplicate checks for email/phone.
+
+In-app features:
+
+Mobile-first responsiveness; verify cart and all interactive features work on 360–414px width devices.
+
+Profile section: avatar, name, email, phone, addresses, order history, saved UPI IDs, logout. Editable.
+
+Product images: responsive srcset, lazy loading, WebP/AVIF when available; placeholder on error; ensure visibility.
+
+Categories: hierarchical categories with filters and breadcrumbs; each product has category_id and tags.
+
+Wishlist: heart toggle; wishlist page; “Move to Cart” single/bulk.
+
+Payments:
+
+Methods: Card, Cash on Delivery, and UPI.
+
+Card: card number, expiry, CVV; client-side Luhn validation; mask inputs; never log sensitive data.
+
+COD: selectable at checkout; optional COD fee support.
+
+UPI:
+
+Pay via UPI ID (VPA) — collect request simulation endpoint.
+
+Pay via dynamic QR — generate a UPI URI (upi://pay) with amount, payee VPA, order ID; render a fresh QR and unique transaction ID per order.
+
+Payment state model: created, pending, succeeded, failed; webhooks/callbacks supported (mock in dev).
+
+Data model (SQL schema via Flyway):
+
+users(id, name, email unique, phone unique, password_hash, created_at, updated_at)
+
+password_resets(id, user_id, otp_code_hash, expires_at, used)
+
+auth_tokens(id, user_id, token, expires_at, device_info)
+
+addresses(id, user_id, line1, line2, city, state, pincode, country, is_default)
+
+categories(id, parent_id, name, slug)
+
+products(id, category_id, name, description, price, stock, image_url, is_active, created_at)
+
+carts(id, user_id, created_at, updated_at)
+
+cart_items(id, cart_id, product_id, qty, price_at_add)
+
+wishlists(id, user_id)
+
+wishlist_items(id, wishlist_id, product_id, added_at)
+
+orders(id, user_id, address_id, status, total_amount, payment_method, transaction_id, created_at)
+
+order_items(id, order_id, product_id, qty, price)
+
+payments(id, order_id, method, status, amount, gateway_txn_id, created_at, metadata JSONB)
+
+otp_logs(id, phone, purpose, otp_code_hash, created_at, expires_at)
+
+Indexes: email, phone, category_id, product name, transaction_id
+
+Security:
+
+Passwords hashed with BCrypt.
+
+JWT auth with refresh tokens.
+
+OTP rate-limiting + expiry (e.g., 5 minutes), 60s resend cooldown, lockout after repeated failures.
+
+CORS configured for the frontend dev host.
+
+REST endpoints (examples):
+
+POST /auth/register
+
+POST /auth/login-email
+
+POST /auth/login-phone/send-otp
+
+POST /auth/login-phone/verify-otp
+
+POST /auth/forgot-password/send-otp
+
+POST /auth/forgot-password/reset
+
+GET/PUT /me, GET /me/orders, GET/PUT /me/addresses
+
+GET /categories, GET /products?category=..., GET /products/{id}
+
+GET/PUT/POST/DELETE /cart and /cart/items
+
+GET/POST/DELETE /wishlist and /wishlist/items
+
+POST /orders, GET /orders/{id}
+
+POST /payments/initiate (card, upi, cod), POST /payments/webhook (mock)
+
+GET /payments/upi/qr?orderId=...
+
+UPI QR generation:
+
+Build UPI URI as: upi://pay?pa={VPA}&pn=EchoCart&am={amount}&tn={orderId}&tr={transactionId}&cu=INR
+
+Generate QR (PNG/SVG) with ZXing; unique transactionId per order.
+
+Vanta.js on login:
+
+Include three.js + vanta script; initialize with backgroundColor #000000, color #FCA311; low motion.
+
+Mobile quality bar:
+
+Touch targets ≥ 44px, sticky cart summary not obscuring actions, smooth scrolling, no fixed overlays blocking input.
+
+Deliverables:
+
+Spring Boot app with Flyway migrations, sample data (categories + products with images)
+
+React app with the login page (Vanta.js), theme, and all flows
+
+.env samples, Docker Compose for Postgres, RUN.md with local setup steps
+
+Unit tests for services and integration tests for auth/cart/orders
+
+Lighthouse check for contrast and best practices
+
+Name and tagline usage:
+
+App header and email templates display “EchoCart — every purchase echoes your style”
+
+Accent animation or subtle glow on primary buttons to “echo” the brand idea
+
+Quick design rules for the theme
+Primary accent: Use #FCA311 for CTAs, active icons, focus rings, and progress.
+
+Surfaces: Use #000000 for base backgrounds; #14213D for cards, nav, drawers, and modals.
+
+Text: Use #E5E5E5 for primary text; use #B8BDC7 (12–70% opacity) for secondary text.
+
+Spacing and rhythm: 8px grid; card radii 12–16px; shadows soft and subtle on dark.
+
+Motion: 150–250ms ease-out; limit large movements; prefer opacity + small translateY.
+
+Vanta.js snippet for the login page
+html
+<div id="vanta-bg" class="fixed inset-0 -z-10"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+<script src="/vanta/vanta.net.min.js"></script>
+<script>
+  VANTA.NET({
+    el: "#vanta-bg",
+    color: 0xFCA311,
+    backgroundColor: 0x000000,
+    points: 10.0,
+    maxDistance: 22.0,
+    spacing: 18.0,
+    gyroControls: false
+  })
+</script>
+Sample Java helpers
+Unique transaction ID generator
+java
+public final class TxnIds {
+  public static String newTransactionId() {
+    String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+    String rand = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    return "EC-" + date + "-" + rand;
+  }
+}
+UPI URI builder
+java
+public class Upi {
+  public static String buildUpiUri(String vpa, String orderId, String txnId, String amount) {
+    return String.format(
+      "upi://pay?pa=%s&pn=%s&am=%s&tn=%s&tr=%s&cu=INR",
+      url(vpa), url("EchoCart"), url(amount), url(orderId), url(txnId)
+    );
+  }
+  private static String url(String s) { return java.net.URLEncoder.encode(s, java.nio.charset.StandardCharsets.UTF_8); }
+}
+Database and data storage
+Where data lives: During development, all user accounts, login credentials (hashed), addresses, products, carts, orders, and payment records are stored in your local PostgreSQL database (Docker Compose). Product images reside in the frontend public assets folder or a local static folder; in production, move them to an object store (e.g., S3-compatible).
+
+Sensitive data: Never store raw card numbers or CVV. Store only minimal payment metadata and gateway references. Passwords are stored as BCrypt hashes, not plain text.
+
+Step-by-step integration on your laptop (Spring Boot + React)
+1) Prerequisites
+Java: 17+
+
+Node: 18+
+
+Docker: Desktop or engine
+
+IDE: IntelliJ IDEA Community
+
+2) Lombok in IntelliJ Community
+Install plugin: Settings > Plugins > Marketplace > search “Lombok” > Install > Restart.
+
+Enable annotation processing: Settings > Build, Execution, Deployment > Compiler > Annotation Processors > check “Enable annotation processing”.
+
+If issues: Invalidate caches and restart. Otherwise remove Lombok and generate getters/setters manually.
+
+3) Clone and configure
+Clone repo: Put it in a path without spaces.
+
+Backend env: Create src/main/resources/application-dev.yaml with:
+
+spring.datasource.url: jdbc:postgresql://localhost:5432/echocart
+
+spring.datasource.username / password
+
+jwt.secret and jwt.expiry
+
+Frontend env: .env with VITE_API_BASE_URL=http://localhost:8080
+
+4) Start the database
+Docker Compose: A compose file should start Postgres with a named volume.
+
+Initialize schema: Flyway runs automatically on backend start; confirm tables are created.
+
+5) Run backend
+Command: ./mvnw spring-boot:run
+
+Health check: GET http://localhost:8080/actuator/health (if actuator added)
+
+6) Run frontend
+Install: npm install
+
+Start: npm run dev
+
+Open: http://localhost:5173 (or printed port)
+
+7) Seed data and test
+Seed: Use Flyway data seeds or POST requests to create categories and products with valid image URLs.
+
+Smoke tests: Register, login (email), login (phone OTP mock), add to cart, wishlist, checkout with COD and UPI QR, see orders in profile.
+
+8) Mobile checks
+DevTools: Emulate 360×640 and 390×844.
+
+Verify: Touch targets ≥ 44px; no overlapping sticky bars; images render with placeholders; cart and drawers operate smoothly.
+
+Acceptance criteria checklist
+Theme: #000000 base, #14213D cards, #FCA311 accent, #E5E5E5 text; WCAG AA passes on key screens.
+
+Login page: Right-aligned card, Vanta.js running, tabs for Phone/Email, forgot password via phone OTP, small login illustration.
+
+Auth: Email+password and phone+OTP working; OTP cooldown and expiry; secure JWT.
+
+Mobile: Cart, wishlist, filters, and checkout fully usable on 360px width.
+
+Profile: Editable details, addresses, UPI IDs, order history; logout works.
+
+Products: Images visible with lazy load and placeholder; products categorized; filters functional.
+
+Wishlist: Add/remove; single and bulk move to cart.
+
+Payments: Card validation/masking, COD option, UPI with dynamic QR and unique transaction ID; payment state transitions persisted.
+
+Data: Passwords hashed; PII protected; Flyway migrations and seed data included.
+
+Docs: RUN.md with local setup; .env samples; API list; test users.
+
+Bonus: CSS tokens you can drop into Tailwind config
+Colors:
+
+primary: #FCA311
+
+surface: #14213D
+
+base: #000000
+
+text: #E5E5E5
+
+Focus ring: ring-2 ring-[#FCA311] ring-offset-2 ring-offset-[#000000]
+
+Card: bg-[#14213D] rounded-xl shadow-[0_6px_24px_rgba(0,0,0,0.24)]
+
+Button primary: bg-[#FCA311] text-[#000000] hover:brightness-105 active:brightness-95 transition
