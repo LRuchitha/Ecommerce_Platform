@@ -1,0 +1,403 @@
+Refined, complete project-generation prompt
+Copy everything in this section and paste it into your generator to create the full project as a ready-to-run Spring Boot + MySQL e-commerce app. The output must be a downloadable ZIP with a complete repo.
+
+Title: EchoCart — Spring Boot e-commerce (no Docker, no Lombok, IntelliJ Community, MySQL Workbench)
+
+Scope:
+
+Build a full-stack e-commerce web app named “EchoCart.”
+
+Backend must be pure Spring Boot (Java 21), no Lombok, no Docker, no complex tooling.
+
+Database: MySQL (set up via MySQL Workbench). Use a single schema named echocart.
+
+IDE target: IntelliJ IDEA Community Edition. Project must run with “Run” immediately after setting application.properties..
+
+Frontend templating: HTML, CSS, Javascript and bootstrap
+
+Provide a downloadable ZIP and full repository structure with all source files, resources, and static assets.
+
+Functional requirements:
+
+Authentication and registration:
+
+Registration page with fields: fullName, phoneNumber, email, username, password, confirmPassword, and optional shipping address (line1, line2, city, state, postalCode, country).
+
+Login page must accept username OR email OR phoneNumber as the login identifier with the same password.
+
+Passwords hashed using BCrypt.
+
+Spring Security with session-based auth; CSRF enabled for state-changing routes.
+
+Theming and animation:
+
+Color palette: yellow, blue, black, orange. Use them harmoniously across UI components.
+
+Login page must have a non-default theme with an animated background inspired by Vanta.js effects (e.g., waves, clouds, or net). Use a lightweight animation (CDN, no build tools). Add tasteful micro-interactions on inputs and buttons.
+
+Overall site should be visually attractive and simple, with smooth transitions for category/product pages, cart, and wishlist.
+
+Catalog and shopping:
+
+Categories and products: at least 20 products distributed across multiple categories (e.g., Electronics, Fashion, Home, Beauty, Sports). Each product has images, name, description, price, stock, and tags.
+
+Product listing, category pages, product detail page.
+
+Wishlist: add/remove; persisted per user.
+
+Cart: add/update quantity/remove; persisted per user; mini-cart indicator in nav.
+
+Checkout and payments:
+
+Checkout flow: address selection, order summary, payment method choice, and confirmation.
+
+Payment methods: card (Stripe test mode) and Cash on Delivery (COD).
+
+For Stripe: integrate server-side PaymentIntent creation and client-side confirmation using Stripe’s JS (CDN). Use environment-configurable keys in application.properties.. If keys are missing, gracefully fall back to COD-only.
+
+Post-order:
+
+Orders: create order with items, totals, status, and payment record (status: SUCCESS/FAILED/PENDING or COD).
+
+Simple order history page for the logged-in user.
+
+Non-functional requirements:
+
+No Lombok. Write explicit getters, setters, constructors, equals/hashCode where needed.
+
+No Docker. No Node/webpack builds. Use Thymeleaf templates and CDN assets.
+
+Clean architecture: entity, repository, service interface + impl, controller, DTOs, security config, validation.
+
+Add Bean Validation (JSR-380) and server-side error messages; display field errors in forms.
+
+Seed database with sample categories and 20+ products at startup (data.sql or a CommandLineRunner).
+
+Deliverables:
+
+Source code structure:
+
+pom.xml with exact dependencies.
+
+src/main/java: domain entities, repositories, services (interfaces and impl), controllers, DTOs, mappers if any, security config, util.
+
+src/main/resources:
+
+templates: Thymeleaf pages for login, register, home, categories, product-list, product-detail, wishlist, cart, checkout, order-confirmation, profile, order-history, layout fragments (header/footer/nav).
+
+static: css, js, images (product images must be present and visually fitting), animations (CDN or minimal JS).
+
+application.properties with placeholders; also include sample application-local.properties commented out.
+
+README files:
+
+reamme1: clear prerequisites and exact steps to run on IntelliJ Community + MySQL Workbench, including DB creation SQL, how to set properties, how to seed, and how to test Stripe (card test numbers) and COD.
+
+README.md: project overview and features.
+
+Build output:
+
+A single downloadable ZIP containing the complete Maven project.
+
+Working model:
+
+Provide instructions with screenshots or GIFs referenced in README (store images locally under static/images/docs).
+
+Ensure running mvn spring-boot:run or IntelliJ Run starts app at http://localhost:8080 with a working login/register, catalog, cart, wishlist, checkout, and payment (Stripe test mode or COD).
+
+Entities and fields:
+
+User: id, fullName, username, email, phoneNumber, passwordHash, role, createdAt, updatedAt, enabled.
+
+Address: id, user, line1, line2, city, state, postalCode, country, isDefault.
+
+Category: id, name, slug, description.
+
+Product: id, category, name, slug, description, price, stock, imageUrl, imageGallery (optional), tags.
+
+Wishlist: id, user, items (ManyToMany with Product or join table WishlistItem).
+
+Cart: id, user, items (CartItem), total, updatedAt.
+
+CartItem: id, cart, product, quantity, unitPrice, lineTotal.
+
+Order: id, user, orderNumber, items (OrderItem), subtotal, shipping, tax, total, status, paymentStatus, paymentMethod, placedAt, shippingAddressSnapshot.
+
+OrderItem: id, order, product, quantity, unitPrice, lineTotal.
+
+Payment: id, order, provider (STRIPE/COD), providerPaymentId, status, amount, currency, createdAt.
+
+Audit fields use LocalDateTime. No Lombok; include getters/setters.
+
+Repositories:
+
+JPA repositories for all entities with essential finders:
+
+UserRepository: findByUsernameOrEmailOrPhoneNumber.
+
+ProductRepository: findByCategory, search by keyword.
+
+Others: standard CRUD.
+
+Services (interfaces + impl):
+
+AuthService: register, login (by username/email/phone), password hashing, validations.
+
+CatalogService: categories, products, product detail, search.
+
+WishlistService: add/remove/list per user.
+
+CartService: add/update/remove/get cart; compute totals.
+
+CheckoutService: place order from cart; capture address; stock checks.
+
+PaymentService: create Stripe PaymentIntent; confirm and update order; handle COD.
+
+OrderService: order history, find by user.
+
+Controllers:
+
+AuthController: GET/POST /register, /login.
+
+HomeController: GET /, /categories, /category/{slug}.
+
+ProductController: GET /product/{slug}.
+
+WishlistController: POST/DELETE /wishlist, GET /wishlist.
+
+CartController: POST/PUT/DELETE /cart, GET /cart.
+
+CheckoutController: GET/POST /checkout, GET /order/confirmation.
+
+PaymentController: POST /payment/stripe/create-intent, POST /payment/stripe/webhook (optional), POST /payment/cod.
+
+Security:
+
+Spring Security configuration:
+
+Form login page at /login (custom Thymeleaf page).
+
+Allow static resources and public pages.
+
+Require auth for wishlist, cart, checkout, orders.
+
+BCryptPasswordEncoder bean.
+
+Custom UserDetailsService to authenticate by username/email/phoneNumber.
+
+Views and UX:
+
+Consistent layout with header/nav/footer, brand logo “EchoCart.”
+
+Palette usage:
+
+Primary: deep blue for headers/nav, accent yellow for CTAs, orange for highlights, black for text and contrast.
+
+Login/register:
+
+Animated background (Vanta-like) using a small JS lib or CSS animated gradients; include CDN and init script.
+
+Floating labels, subtle focus/hover animations, success/error toasts.
+
+Catalog:
+
+Card grids with image-first design, subtle hover lift, skeleton loaders.
+
+Cart/wishlist:
+
+Smooth transitions, quantity stepper animation, mini-cart badge.
+
+Checkout:
+
+Progress steps, clear totals, simple address form, COD toggle, Stripe card element with test keys.
+
+Validation:
+
+Server-side Bean Validation with meaningful messages.
+
+Client-side minimal validation for better UX.
+
+Seed data:
+
+At least 5 categories and 20+ products with high-quality images under static/images/products.
+
+Create one demo user (email: demo@echocart.test, username: demo, phone: 9999999999, password: Demo@123).
+
+Configuration:
+
+application.properties placeholders:
+
+spring.datasource.url=jdbc:mysql://localhost:3306/echocart?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+spring.datasource.username=YOUR_DB_USER
+
+spring.datasource.password=YOUR_DB_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.show-sql=true
+
+spring.thymeleaf.cache=false
+
+stripe.api.key=YOUR_STRIPE_SECRET_KEY
+
+stripe.public.key=YOUR_STRIPE_PUBLISHABLE_KEY
+
+If stripe.api.key is empty, hide card option and show COD only.
+
+Build and run:
+
+Provide exact steps in reamme1:
+
+Prereqs: Java 17+, Maven, MySQL Server, MySQL Workbench, IntelliJ CE.
+
+Create DB schema echocart (give SQL).
+
+Update application.properties with credentials.
+
+Run mvn spring-boot:run or IntelliJ Run.
+
+Access http://localhost:8080.
+
+Stripe test cards (4242 4242 4242 4242, any future date, any CVC, any ZIP).
+
+Screenshots/GIFs path for quick verification.
+
+Provide Postman collection or cURL samples for key endpoints.
+
+Quality:
+
+Clear package naming: com.echocart.app..
+
+Comments where non-trivial.
+
+No Lombok. No Docker. No Node build. Keep it simple and robust.
+
+Database setup in MySQL Workbench
+Schema name: echocart
+
+Character set: utf8mb4
+
+Collation: utf8mb4_0900_ai_ci (or utf8mb4_general_ci if unavailable)
+
+SQL to run:
+
+sql
+CREATE DATABASE IF NOT EXISTS echocart
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+User and grants:
+
+sql
+CREATE USER IF NOT EXISTS 'echocart_user'@'localhost' IDENTIFIED BY 'StrongPassword!123';
+GRANT ALL PRIVILEGES ON echocart.* TO 'echocart_user'@'localhost';
+FLUSH PRIVILEGES;
+Example application.properties
+properties
+# Server
+server.port=8080
+
+# MySQL
+spring.datasource.url=jdbc:mysql://localhost:3306/echocart?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=echocart_user
+spring.datasource.password=StrongPassword!123
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Thymeleaf
+spring.thymeleaf.cache=false
+
+# Static resource cache
+spring.web.resources.cache.period=3600
+
+# Security
+spring.main.allow-circular-references=true
+
+# Stripe (leave empty to default to COD-only)
+stripe.api.key=
+stripe.public.key=
+stripe.currency=INR
+Minimal pom.xml dependencies
+Include these in pom.xml:
+
+spring-boot-starter-web
+
+spring-boot-starter-thymeleaf
+
+spring-boot-starter-security
+
+spring-boot-starter-data-jpa
+
+mysql-connector-j
+
+spring-boot-starter-validation
+
+Optional for Stripe server-side: stripe-java
+
+Snippet:
+
+xml
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.stripe</groupId>
+    <artifactId>stripe-java</artifactId>
+    <version>24.0.0</version>
+    <optional>true</optional>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+Run and verify on IntelliJ Community
+Java/Maven: Ensure Java 17+ and Maven installed. In IntelliJ CE, open the project as a Maven project.
+
+Database: Create the echocart schema and user (see SQL above) in MySQL Workbench.
+
+Properties: Edit src/main/resources/application.properties with your DB credentials and optional Stripe keys.
+
+Run: Use mvn spring-boot:run or IntelliJ Run. App should start on http://localhost:8080.
+
+Test flows:
+
+Register a new user; then log in using username, email, or phone with the same password.
+
+Browse categories, add to wishlist and cart, proceed to checkout.
+
+Try COD. If Stripe keys are set, test card 4242 4242 4242 4242 with any future date/CVC for success.
+
+Notes on theming and animation assets
+Animated login: Use a lightweight Vanta-like effect via a CDN (e.g., Vanta NET or WAVES). Initialize on DOM load and ensure reduced motion respects prefers-reduced-motion.
+
+Palette application: Deep blue headers, yellow CTAs, orange accents (sale badges, hover), black text on light backgrounds. Keep contrast accessible.
+
+Images: Place all product images under static/images/products and reference them in seed data so pages look complete out of the box.
+
+If you want, I can tailor the seed categories and product set to your brand vibe (colors, names, and microcopy) before you generate.
